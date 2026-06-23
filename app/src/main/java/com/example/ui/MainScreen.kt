@@ -33,7 +33,7 @@ fun MainScreen(viewModel: MainViewModel) {
     val strings = LocalStrings.current
     
     val bottomBarsRoutes = listOf("home", "discover", "planner", "shopping", "profile")
-    val subtitle = if (strings == SomaliStrings) "Kalkaalshaha Cuntada" else "Cooking Assistant"
+    val subtitle = if (strings == SomaliStrings) "Kaliyaha Cuntada" else "Cooking Assistant"
 
     Scaffold(
         topBar = {
