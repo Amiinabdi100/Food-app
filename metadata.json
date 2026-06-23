@@ -1,0 +1,8 @@
+{
+  "name": "Smart Fridge & Culinary Assistant",
+  "description": "Analyze fridge photos to discover recipes based on available ingredients. Supports Somali and English.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
