@@ -1,6 +1,5 @@
 package com.example.ui
 
-import com.example.foodapp.utils.InternetChecker
 import android.app.Application
 import android.graphics.Bitmap
 import android.util.Log
@@ -122,20 +121,31 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun recordCookingHistory(history: com.example.data.CookingHistoryEntity) = viewModelScope.launch { repo.addCookingHistory(history) }
 
+    private fun cleanJson(text: String): String {
+        var cleaned = text.trim()
+        if (cleaned.startsWith("```json")) {
+            cleaned = cleaned.removePrefix("```json")
+        } else if (cleaned.startsWith("```")) {
+            cleaned = cleaned.removePrefix("```")
+        }
+        if (cleaned.endsWith("```")) {
+            cleaned = cleaned.removeSuffix("```")
+        }
+        return cleaned.trim()
+    }
+
     fun detectIngredients(bitmap: Bitmap, lang: String) {
         viewModelScope.launch {
-                  
-             _detectState.value = DetectState.Loading
-
-if (!InternetChecker.isInternetAvailable(getApplication())) {
-    _detectState.value =
-        DetectState.Error(
-            "Fadlan iska hubi internetkaaga oo mar kale isku day."
-        )
-    return@launch
-}
-
-try {
+            _detectState.value = DetectState.Loading
+            try {
+                if (!InternetChecker.isInternetAvailable(getApplication())) {
+                    _detectState.value = DetectState.Error(
+                        if (lang == "so") "📡 Fadlan hubi khadkaaga internet-ka oo isku day markale."
+                        else "📡 Please check your internet connection and try again."
+                    )
+                    return@launch
+                }
+                
                 val apiKey = BuildConfig.GEMINI_API_KEY
                 val base64Params = bitmap.toBase64()
                 val promptText = if (lang == "so") {
@@ -160,19 +170,45 @@ try {
                 val textResponse = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
                 
                 if (textResponse != null) {
+                    val cleanedText = cleanJson(textResponse)
                     val adapter = moshi.adapter(IngredientsDetectionResponse::class.java)
-                    val result = adapter.fromJson(textResponse)
+                    val result = adapter.fromJson(cleanedText)
                     if (result != null && result.ingredients.isNotEmpty()) {
                         _detectState.value = DetectState.Success(result.ingredients)
                     } else {
-                        _detectState.value = DetectState.Error("No ingredients found or bad format.")
+                        _detectState.value = DetectState.Error(
+                            if (lang == "so") "Natiijooyin ku filan lama helin. Fadlan isku day mar kale."
+                            else "No ingredients found or bad format."
+                        )
                     }
                 } else {
-                    _detectState.value = DetectState.Error("Empty response from API")
+                    _detectState.value = DetectState.Error(
+                        if (lang == "so") "Jawaab madhan oo ku saabsan codsiga AI."
+                        else "Empty response from API"
+                    )
                 }
+            } catch (e: java.net.UnknownHostException) {
+                Log.e("DetectError", "UnknownHostException: ${e.message}")
+                _detectState.value = DetectState.Error(
+                    if (lang == "so") "📡 Fadlan hubi khadkaaga internet-ka oo isku day markale."
+                    else "📡 Please check your internet connection and try again."
+                )
+            } catch (e: retrofit2.HttpException) {
+                Log.e("DetectError", "HttpException: ${e.code()} ${e.message()}")
+                val msg = when (e.code()) {
+                    429 -> if (lang == "so") "Kalkaalshaha AI aad buu u mashquulsan yahay hadda. Fadlan isku day xoogaa yar ka dib." else "The AI service is temporarily busy. Please try again in a moment."
+                    400 -> if (lang == "so") "Cillad farsamo oo ku saabsan codsiga AI. Fadlan isku day mar kale." else "Invalid request format to AI. Please try again."
+                    403 -> if (lang == "so") "Furaha API (API Key) waa khalad ama lama oggola. Fadlan hubi API Key-gaaga." else "Invalid API Key or permission denied. Please check your API key."
+                    404 -> if (lang == "so") "Adeegga AI lama helin (404). Fadlan la xiriir horumariyaha." else "AI service not found (404). Please contact the developer."
+                    else -> if (lang == "so") "Cillad xiriirka server-ka ah (Malaha khaladaadka API). Fadlan isku day mar kale." else "Server communication error. Please try again."
+                }
+                _detectState.value = DetectState.Error(msg)
             } catch (e: Exception) {
-                Log.e("DetectError", e.message.toString())
-                _detectState.value = DetectState.Error(e.message ?: "Unknown error")
+                Log.e("DetectError", "Exception: ${e.message}")
+                _detectState.value = DetectState.Error(
+                    if (lang == "so") "Waxbaa khaldamay. Fadlan isku day mar kale."
+                    else "Something went wrong. Please try again."
+                )
             }
         }
     }
@@ -181,6 +217,14 @@ try {
         viewModelScope.launch {
             _recipeGenState.value = RecipeGenState.Loading
             try {
+                if (!InternetChecker.isInternetAvailable(getApplication())) {
+                    _recipeGenState.value = RecipeGenState.Error(
+                        if (lang == "so") "📡 Fadlan hubi khadkaaga internet-ka oo isku day markale."
+                        else "📡 Please check your internet connection and try again."
+                    )
+                    return@launch
+                }
+                
                 val apiKey = BuildConfig.GEMINI_API_KEY
                 
                 val joinedIngredients = ingredients.joinToString(", ")
@@ -258,19 +302,45 @@ try {
                 val textResponse = response.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text
                 
                 if (textResponse != null) {
+                    val cleanedText = cleanJson(textResponse)
                     val adapter = moshi.adapter(RecipeGenerationResponse::class.java)
-                    val result = adapter.fromJson(textResponse)
+                    val result = adapter.fromJson(cleanedText)
                     if (result != null && result.recipes.isNotEmpty()) {
                         _recipeGenState.value = RecipeGenState.Success(result.recipes)
                     } else {
-                        _recipeGenState.value = RecipeGenState.Error("No recipes generated.")
+                        _recipeGenState.value = RecipeGenState.Error(
+                            if (lang == "so") "Natiijooyin ku filan lama helin. Fadlan isku day mar kale."
+                            else "No recipes generated."
+                        )
                     }
                 } else {
-                    _recipeGenState.value = RecipeGenState.Error("Empty response from API")
+                    _recipeGenState.value = RecipeGenState.Error(
+                        if (lang == "so") "Jawaab madhan oo ku saabsan codsiga AI."
+                        else "Empty response from API"
+                    )
                 }
+            } catch (e: java.net.UnknownHostException) {
+                Log.e("RecipeGenError", "UnknownHostException: ${e.message}")
+                _recipeGenState.value = RecipeGenState.Error(
+                    if (lang == "so") "📡 Fadlan hubi khadkaaga internet-ka oo isku day markale."
+                    else "📡 Please check your internet connection and try again."
+                )
+            } catch (e: retrofit2.HttpException) {
+                Log.e("RecipeGenError", "HttpException: ${e.code()} ${e.message()}")
+                val msg = when (e.code()) {
+                    429 -> if (lang == "so") "Kalkaalshaha AI aad buu u mashquulsan yahay hadda. Fadlan isku day xoogaa yar ka dib." else "The AI service is temporarily busy. Please try again in a moment."
+                    400 -> if (lang == "so") "Cillad farsamo oo ku saabsan codsiga AI. Fadlan hubi agabka aad dooratay oo isku day mar kale." else "Technical error with the AI request. Please check your selected ingredients and try again."
+                    403 -> if (lang == "so") "Furaha API (API Key) waa khalad ama lama oggola. Fadlan hubi API Key-gaaga." else "Invalid API Key or permission denied. Please check your API key."
+                    404 -> if (lang == "so") "Adeegga AI lama helin (404). Fadlan la xiriir horumariyaha." else "AI service not found (404). Please contact the developer."
+                    else -> if (lang == "so") "Cillad xiriirka server-ka ah (Malaha khaladaadka API). Fadlan isku day mar kale." else "Server communication error. Please try again."
+                }
+                _recipeGenState.value = RecipeGenState.Error(msg)
             } catch (e: Exception) {
-                Log.e("RecipeGenError", e.message.toString())
-                _recipeGenState.value = RecipeGenState.Error(e.message ?: "Unknown error")
+                Log.e("RecipeGenError", "Exception: ${e.message}")
+                _recipeGenState.value = RecipeGenState.Error(
+                    if (lang == "so") "Waxbaa khaldamay. Fadlan isku day mar kale."
+                    else "Something went wrong. Please try again."
+                )
             }
         }
     }

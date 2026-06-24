@@ -32,8 +32,8 @@ fun MainScreen(viewModel: MainViewModel) {
     
     val strings = LocalStrings.current
     
-    val bottomBarsRoutes = listOf("home", "discover", "planner", "shopping", "profile")
-    val subtitle = if (strings == SomaliStrings) "Kaliyaha Cuntada" else "Cooking Assistant"
+    val bottomBarsRoutes = listOf("home", "discover", "planner", "shopping", "settings")
+    val subtitle = if (strings == SomaliStrings) "Kalkaalshaha Cuntada" else "Cooking Assistant"
 
     Scaffold(
         topBar = {
@@ -68,23 +68,6 @@ fun MainScreen(viewModel: MainViewModel) {
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
                         ) {
-                            val languageCode by viewModel.language.collectAsState()
-                            Surface(
-                                shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                                onClick = { 
-                                    viewModel.setLanguage(if (languageCode == "so") "en" else "so")
-                                }
-                            ) {
-                                Text(
-                                    text = "EN / SO",
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
@@ -161,11 +144,11 @@ fun MainScreen(viewModel: MainViewModel) {
                         }
                     )
                     NavigationBarItem(
-                        icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-                        label = { Text(if (strings == SomaliStrings) "Kunto" else "Profile") },
-                        selected = currentRoute == "profile",
+                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                        label = { Text(if (strings == SomaliStrings) "Dejinta" else "Settings") },
+                        selected = currentRoute == "settings",
                         onClick = {
-                            navController.navigate("profile") {
+                            navController.navigate("settings") {
                                 popUpTo(navController.graph.startDestinationId) { saveState = true }
                                 launchSingleTop = true
                                 restoreState = true
