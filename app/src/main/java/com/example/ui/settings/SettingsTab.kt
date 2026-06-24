@@ -144,7 +144,7 @@ fun SettingsTab(viewModel: MainViewModel) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = if (strings == SomaliStrings) "Fadlan dooro luqadaada" else "Please choose your language",
+                    text = if (strings == SomaliStrings) "Fadlan dooro luqadaada hoo" else "Please choose your language",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium,
@@ -182,7 +182,7 @@ fun SettingsTab(viewModel: MainViewModel) {
         Spacer(modifier = Modifier.height(24.dp))
         
         // --- App Settings ---
-        Text(if (strings == SomaliStrings) "Dookhyada Abka" else "App Preferences", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+        Text(if (strings == SomaliStrings) "Doorbidyada Abka" else "App Preferences", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp)) {
             Text(strings.darkMode, style = MaterialTheme.typography.bodyLarge)
             Switch(checked = isDarkMode ?: false, onCheckedChange = { viewModel.setDarkMode(it) })
@@ -265,7 +265,7 @@ fun SettingsTab(viewModel: MainViewModel) {
         Text(strings.aboutApp, style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = if (strings == SomaliStrings) "Kalkaalshaha Cuntada & Qaboojiyaha Casriga ah wuxuu isticmaalaa AI si uu kaaga caawiyo inaad qorsheyso cuntooyinka iyo karinta." else "Smart Fridge & Culinary Assistant uses AI to help you identify ingredients and cook amazing recipes.",
+            text = if (strings == SomaliStrings) "Kaaliyaha Cuntada & Qaboojiyaha Casriga ah wuxuu isticmaalaa AI si uu kaaga caawiyo inaad qorsheyso cuntooyinka iyo karinta." else "Smart Fridge & Culinary Assistant uses AI to help you identify ingredients and cook amazing recipes.",
             style = MaterialTheme.typography.bodyMedium
         )
         Spacer(modifier = Modifier.height(16.dp))
