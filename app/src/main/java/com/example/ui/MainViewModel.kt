@@ -124,8 +124,18 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun detectIngredients(bitmap: Bitmap, lang: String) {
         viewModelScope.launch {
-            _detectState.value = DetectState.Loading
-            try {
+                  
+             _detectState.value = DetectState.Loading
+
+if (!InternetChecker.isInternetAvailable(getApplication())) {
+    _detectState.value =
+        DetectState.Error(
+            "Fadlan iska hubi internetkaaga oo mar kale isku day."
+        )
+    return@launch
+}
+
+try {
                 val apiKey = BuildConfig.GEMINI_API_KEY
                 val base64Params = bitmap.toBase64()
                 val promptText = if (lang == "so") {
