@@ -1,5 +1,6 @@
 package com.example.ui
 
+import com.example.foodapp.utils.InternetChecker
 import android.app.Application
 import android.graphics.Bitmap
 import android.util.Log
